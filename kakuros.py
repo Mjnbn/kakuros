@@ -1,14 +1,10 @@
-import threading
 import time
 from collections import defaultdict
 import copy
 import graphic
 import csp
-import test
-import kakuros
 
 
-<<<<<<< HEAD
 class Kakuros:
     def __init__(self, board):
         self.number_of_assignments = 0
@@ -171,10 +167,17 @@ class Kakuros:
 
     def get_min_sum(self, var):
         return min(
-            sum([1 for neighbor in self.vertical_neighbors[var] if neighbor not in self.curr_assignments]),
-            sum([1 for neighbor in self.horizontal_neighbors[var] if neighbor not in self.curr_assignments]),
+            [
+                self.vertical_sum[var] - self.vertical_sum_so_far.get(var, 0)
+                if var in self.vertical_sum
+                else 1000
+            ],
+            [
+                self.horizontal_sum[var] - self.horizontal_sum_so_far.get(var, 0)
+                if var in self.horizontal_sum
+                else 1000
+            ],
         )
-
 
     def get_num_consistent_values(self, var, value):
         cnt = 0
@@ -210,25 +213,3 @@ class Kakuros:
             self.vertical_sum_so_far[var] -= val
         if var in self.horizontal_sum:
             self.horizontal_sum_so_far[var] -= val
-=======
->>>>>>> 450f01d79f4044b6a70599e07ab52f52a4f404a6
-
-
-def main():
-    for name, board in test.boards:
-        # if name != "medium1":
-        #     continue
-        k = kakuros.Kakuros(board)
-        start = time.time()
-        c = csp.CSP(k, variable_ordering=csp.MCV, value_ordering=csp.LCV)
-        c.solve()
-        # thread = threading.Thread(target=c.solve)
-        # thread.start()
-        end = time.time()
-        print("Time on test %s: %.6f" % (name, end - start))
-        print("Number of assignments: %d" % k.number_of_assignments)
-        # graphic.graphic(k)
-
-
-if __name__ == "__main__":
-    main()

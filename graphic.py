@@ -71,6 +71,8 @@ def create_kakuro_cell(row, col, screen, value=None):
 def graphic(k):
     # Initialize Pygame
     pygame.init()
+    # Define board size
+    BOARD_SIZE = len(k.board)
 
     # Define board size
     BOARD_SIZE = len(k.board)
@@ -97,6 +99,5 @@ def graphic(k):
 
                 create_kakuro_cell(row, col, window, value=value)
                 pygame.display.flip()
-                clock.tick(1000000)
 
     pygame.quit()
