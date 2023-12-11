@@ -14,20 +14,16 @@ class Kakuros:
         self.neighbors = defaultdict(set)
         self.vertical_neighbors = defaultdict(set)
         self.horizontal_neighbors = defaultdict(set)
-        self.vertical_sum = defaultdict(int)
-        self.horizontal_sum = defaultdict(int)
-        self.constraints = defaultdict(set)
+        self.vertical_sum = {}
+        self.horizontal_sum = {}
+        self.constraints = {}
         self.curr_assignments = {}
-        self.domains = {}  # {var1: [val1, val2, ...], ...}
-        #self.unassigned_variables = variables.copy()
-        #self.state = state
-        # for var in self.curr_assignments:
-        #     self.state[var[0]][var[1]] = str(self.curr_assignments[var])
-        #     self.unassigned_variables.remove(var)
+        self.domains = {}
+        self.domain_history = []
+
         self.filtering = filtering
         self.variable_ordering = variable_ordering
         self.value_ordering = value_ordering
-        #self.get_info(board)
 
     def get_info(self):
         variables = []
@@ -139,10 +135,17 @@ class Kakuros:
     def set_value(self, var, val):
         self.curr_assignments[var] = val
         self.board[var[0]][var[1]] = chr(val + ord('0'))
-        time.sleep(0.05)
         for v in self.neighbors[var]:
             if val in self.domains[v]:
                 self.domains[v].remove(val)
+                self.domain_history.append((var, v, val))
+
+    def remove_value(self, var, val):
+        self.board[var[0]][var[1]] = ''
+        self.curr_assignments.pop(var)
+        while len(self.domain_history) > 0 and self.domain_history[-1][0] == var:
+            (v1, v2, val) = self.domain_history.pop()
+            self.domains[v2].add(val)        
 
 
 def backtrack(kakuros):
@@ -157,9 +160,7 @@ def backtrack(kakuros):
             result = backtrack(kakuros)
             if result is True:
                 return result
-            kakuros.curr_assignments.pop(v)
-            kakuros.board[v[0]][v[1]] = ''
-            kakuros.domains = pre_k
+            kakuros.remove_value(v, d)
 
     return False
 
@@ -187,9 +188,13 @@ def solve_kakuros(k):
 
 def main():
     k = Kakuros(matrix, variable_ordering=NORMAL)
-    thread = threading.Thread(target=solve_kakuros, args=[k])
-    thread.start()
+    # thread = threading.Thread(target=solve_kakuros, args=[k])
+    # thread.start()
     #time.sleep(0.5)
+    # graphic.graphic(k)
+    solve_kakuros(k)
+    for i in range(len(k.board)):
+        print(k.board[i])
     graphic.graphic(k)
 
 
