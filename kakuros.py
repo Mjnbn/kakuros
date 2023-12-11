@@ -167,16 +167,8 @@ class Kakuros:
 
     def get_min_sum(self, var):
         return min(
-            [
-                self.vertical_sum[var] - self.vertical_sum_so_far.get(var, 0)
-                if var in self.vertical_sum
-                else 1000
-            ],
-            [
-                self.horizontal_sum[var] - self.horizontal_sum_so_far.get(var, 0)
-                if var in self.horizontal_sum
-                else 1000
-            ],
+            sum([1 for neighbor in self.vertical_neighbors[var] if neighbor not in self.curr_assignments]),
+            sum([1 for neighbor in self.horizontal_neighbors[var] if neighbor not in self.curr_assignments]),
         )
 
     def get_num_consistent_values(self, var, value):
