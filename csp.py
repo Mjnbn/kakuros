@@ -2,12 +2,13 @@ NORMAL = 0
 MCV = 1
 LCV = 2
 
+
 class CSP:
     def __init__(self, kakuros, variable_ordering=None, value_ordering=None):
         """
-            filtering: None, Arc_Consistency, or Forward_Checking
-            variable_ordering: None, MCV
-            value_ordering: None, LCV
+        filtering: None, Arc_Consistency, or Forward_Checking
+        variable_ordering: None, MCV
+        value_ordering: None, LCV
         """
         self.kakuros = kakuros
         self.variable_ordering = variable_ordering
@@ -15,7 +16,7 @@ class CSP:
 
     def solve(self):
         """
-            Returns True if a solution is found, False otherwise
+        Returns True if a solution is found, False otherwise
         """
         return self.backtrack()
 
@@ -26,16 +27,28 @@ class CSP:
                     return v
             return None
         elif self.variable_ordering == MCV:
+            candid = None
+            for v in self.kakuros.variables:
+                if v not in self.kakuros.curr_assignments:
+                    if candid is None or self.kakuros.get_min_sum(
+                        v
+                    ) < self.kakuros.get_min_sum(candid):
+                        candid = v
+            sum = self.kakuros.get_min_sum(candid)
             mcv = None
             for v in self.kakuros.variables:
                 if v not in self.kakuros.curr_assignments:
-                    if mcv is None or len(self.kakuros.domains[v]) < len(self.kakuros.domains[mcv]):
+                    if self.kakuros.get_min_sum(v) == sum and (
+                        mcv == None
+                        or len(self.kakuros.get_domain(v))
+                        < len(self.kakuros.get_domain(mcv))
+                    ):
                         mcv = v
             return mcv
 
     def backtrack(self):
         """
-            Returns True if a solution is found, False otherwise
+        Returns True if a solution is found, False otherwise
         """
         if self.get_next_variable() is None:
             return True
@@ -46,7 +59,9 @@ class CSP:
 
         domain = self.kakuros.domains[var]
         if self.value_ordering == LCV:
-            domain = sorted(domain, key=lambda val: self.kakuros.get_num_consistent_values(var, val))
+            domain = sorted(
+                domain, key=lambda val: self.kakuros.get_num_consistent_values(var, val)
+            )
 
         for val in domain:
             if self.kakuros.is_consistent(var, val):
