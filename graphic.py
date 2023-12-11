@@ -2,10 +2,6 @@
 
 import pygame
 
-
-# Define board size
-BOARD_SIZE = 7
-
 # Define cell properties
 CELL_SIZE = 50
 CELL_PADDING = 5
@@ -16,18 +12,16 @@ CLUE_CELL_COLOR = (0, 0, 0)  # Black
 TEXT_COLOR = (255, 255, 255)  # White
 BACK_COLOR = (128, 128, 128)  # GRAY
 
-# matrix = [
-#     ['X', 'X', '11\\', '5\\', 'X', '15\\', '15\\', 'X'],
-#     ['X', '3\\3', '', '', '4\\17', '', '', 'X'],
-#     ['\\22', '', '', '', '', '', '', 'X'],
-#     ['\\3', '', '', '11\\4', '', '', '10\\', 'X'],
-#     ['X', '\\8', '', '', '7\\3', '', '', '8\\'],
-#     ['X', 'X', '4\\4', '', '', '3\\4', '', ''],
-#     ['X', '\\21', '', '', '', '', '', ''],
-#     ['X', '\\3', '', '', '\\4', '', '', 'X']
-# ]
-
-
+matrix = [
+    ['X', 'X', '11\\', '5\\', 'X', '15\\', '15\\', 'X'],
+    ['X', '3\\3', '', '', '4\\17', '', '', 'X'],
+    ['\\22', '', '', '', '', '', '', 'X'],
+    ['\\3', '', '', '11\\4', '', '', '10\\', 'X'],
+    ['X', '\\8', '', '', '7\\3', '', '', '8\\'],
+    ['X', 'X', '4\\4', '', '', '3\\4', '', ''],
+    ['X', '\\21', '', '', '', '', '', ''],
+    ['X', '\\3', '', '', '\\4', '', '', 'X']
+]
 
 # Function to create a Kakuro cell
 def create_kakuro_cell(row, col, screen, value=None):
@@ -66,6 +60,9 @@ def graphic(k):
     # Initialize Pygame
     pygame.init()
 
+    # Define board size
+    BOARD_SIZE = len(k.board)
+
     # Create the main window
     window = pygame.display.set_mode(((CELL_SIZE + CELL_PADDING) * BOARD_SIZE, (CELL_SIZE + CELL_PADDING) * BOARD_SIZE))
     pygame.display.set_caption('Kakuro Board')
@@ -77,8 +74,8 @@ def graphic(k):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        for row in range(BOARD_SIZE):
-            for col in range(BOARD_SIZE):
+        for row in range(len(k.board)):
+            for col in range(len(k.board[0])):
                 value = k.board[row][col]
 
                 create_kakuro_cell(row, col,window,  value=value)

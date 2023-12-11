@@ -3,11 +3,10 @@ import time
 from collections import defaultdict
 import copy
 import graphic
-
-NORMAL = 0
+import csp
 
 class Kakuros:
-    def __init__(self, board, filtering=None, variable_ordering=None, value_ordering=None):
+    def __init__(self, board):
         self.board = board
         self.variables = []
         self.raw_domains = defaultdict(list)
@@ -20,10 +19,7 @@ class Kakuros:
         self.curr_assignments = {}
         self.domains = {}
         self.domain_history = []
-
-        self.filtering = filtering
-        self.variable_ordering = variable_ordering
-        self.value_ordering = value_ordering
+        self.get_info()
 
     def get_info(self):
         variables = []
@@ -35,7 +31,6 @@ class Kakuros:
                         self.curr_assignments[(i, j)] = int(cell)
                     else:
                         variables.append((i, j))
-                        self.domains[(i,j)] = set([i for i in range(1, 10)])
                 if '\\' in cell:
                     index = cell.find('\\')  # Find the index of '\\'
 
@@ -59,6 +54,11 @@ class Kakuros:
 
         for c,v in self.curr_assignments.items():
             self.set_value(c,v)
+
+        for v in variables:
+            if v not in self.curr_assignments:
+                max_number = min(9, self.vertical_sum[v] if v in self.vertical_sum else 9, self.horizontal_sum[v] if v in self.horizontal_sum else 9)
+                self.domains[v] = set(range(1, max_number + 1))
 
         self.variables = variables
 
@@ -125,12 +125,14 @@ class Kakuros:
 
         return True
 
-    def get_next_variable(self):
-        if self.variable_ordering == NORMAL:
-            for v in self.variables:
-                if v not in self.curr_assignments:
-                    return v
-            return None
+    def get_num_consistent_values(self, var, value):
+        cnt = 0
+        for neighbor in self.neighbors[var]:
+            if neighbor in self.curr_assignments:
+                continue
+            if value in self.domains[neighbor]:
+                cnt += 1
+        return cnt
 
     def set_value(self, var, val):
         self.curr_assignments[var] = val
@@ -166,14 +168,16 @@ def backtrack(kakuros):
 
 
 matrix = [
-    ['X', 'X', '11\\', '5\\', 'X', '15\\', '15\\', 'X'],
-    ['X', '3\\3', '', '', '4\\17', '', '', 'X'],
-    ['\\22', '', '', '', '', '', '', 'X'],
-    ['\\3', '', '', '11\\4', '', '', '10\\', 'X'],
-    ['X', '\\8', '', '', '7\\3', '', '', '8\\'],
-    ['X', 'X', '4\\4', '', '', '3\\4', '', ''],
-    ['X', '\\21', '', '', '', '', '', ''],
-    ['X', '\\3', '', '', '\\4', '', '', 'X']
+    ['X', 'X', 'X', '3\\', '23\\', '45\\', '6\\', 'X', 'X', 'X'],
+    ['X', 'X', '\\12', '', '', '', '', '4\\', 'X', 'X'],
+    ['X', '20\\', '32\\21', '', '', '', '', '', '15\\', 'X'],
+    ['\\3', '', '', '17\\15', '', '', '5\\4', '', '', '16\\'],
+    ['\\24', '', '', '', '16\\3', '', '', '4\\7', '', ''],
+    ['\\45', '', '', '', '', '', '', '', '', ''],
+    ['\\17', '', '', '13\\17', '', '', '24\\6', '', '', ''],
+    ['X', '\\16', '', '', '17\\15', '', '', '13\\6', '', ''],
+    ['X', 'X', '\\32', '', '', '', '', '', 'X', 'X'],
+    ['X', 'X', 'X', '\\30', '', '', '', '', 'X', 'X']
 ]
 
 
@@ -187,15 +191,18 @@ def solve_kakuros(k):
     print("Time: %.2f" % (end - start))
 
 def main():
-    k = Kakuros(matrix, variable_ordering=NORMAL)
+    k = Kakuros(matrix)
     # thread = threading.Thread(target=solve_kakuros, args=[k])
     # thread.start()
     #time.sleep(0.5)
     # graphic.graphic(k)
-    solve_kakuros(k)
-    for i in range(len(k.board)):
-        print(k.board[i])
-    graphic.graphic(k)
+
+    start = time.time()
+    c = csp.CSP(k, variable_ordering=csp.MCV, value_ordering=csp.LCV)
+    c.solve()
+    # graphic.graphic(k)
+    end = time.time()
+    print("Time: %.6f" % (end - start))
 
 
 if __name__== "__main__":
